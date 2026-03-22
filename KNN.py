@@ -110,7 +110,3 @@ results_df = pd.DataFrame(results)
 print("\nFinal Comparison Table")
 print("-" *75 )
 print(results_df)
-
-
-
-
