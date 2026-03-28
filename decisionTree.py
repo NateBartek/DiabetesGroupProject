@@ -4,8 +4,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, classification_report, roc_auc_score,RocCurveDisplay
 
-
+#load data
 diabetes_health_indicators_data = pd.read_csv("diabetes_012_health_indicators_BRFSS2015.csv")
+
+#drop any rows with missing values
+diabetes_health_indicators_data = diabetes_health_indicators_data.dropna()
+
+#prints class balance
+print("--- Class Balance ---")
+print(diabetes_health_indicators_data['Diabetes_012'].value_counts())
+print("\n")
+print(diabetes_health_indicators_data['Diabetes_012'].value_counts(normalize=True) * 100)
+
 
 feature_matrix = diabetes_health_indicators_data.drop('Diabetes_012', axis=1)
 feature_label = diabetes_health_indicators_data['Diabetes_012']
@@ -19,7 +29,7 @@ diabete_prediction_model.fit(features_train, labels_train)
 predicted_diabetes = diabete_prediction_model.predict(features_test)
 predicted_diabetes_probability = diabete_prediction_model.predict_proba(features_test)
 
-print("--- Accuracy ---")
+print("\n--- Accuracy ---")
 print(f"Training Accuracy : {accuracy_score(labels_train, diabete_prediction_model.predict(features_train)):.4f}")
 print(f"Test Accuracy     : {accuracy_score(labels_test, predicted_diabetes):.4f}")
 
