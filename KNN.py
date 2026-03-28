@@ -4,7 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, \
+    classification_report, ConfusionMatrixDisplay, confusion_matrix
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
 from sklearn.utils import resample
@@ -18,14 +19,8 @@ def run_knn_model(file_name, target_column, dataset_name):
     #Load dataset
     df = pd.read_csv(file_name)
 
-    #Check missing values
-    df.isnull().sum()
+    df = df.sample(n=20000, random_state=42)
 
-    # If missing values exist, drop them
-    df = df.dropna()
-
-    #Check class balance
-    df[target_column].value_counts()
 
     #Split features and target
     X = df.drop(target_column, axis=1)
@@ -64,49 +59,62 @@ def run_knn_model(file_name, target_column, dataset_name):
 
     #Predictions
     y_pred = knn.predict(X_test)
+
+    train_acc = knn.score(X_train, y_train)
+    test_acc = knn.score(X_test, y_test)
+
     y_prob = knn.predict_proba(X_test)
 
-    #Evaluation
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average="weighted")
-    recall = recall_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
+    print("Training Accuracy:", round(train_acc, 4))
+    print("Testing Accuracy:", round(test_acc, 4))
 
-    # ROC-AUC (handle binary vs multi-class)
+    roc_auc = roc_auc_score(y_test, y_prob, multi_class="ovr", average="macro")
+    print("ROC-AUC Score:", round(roc_auc, 4))
+
+
+    print("\nClassification Report:")
+    print(classification_report(y_test, y_pred))
+
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    disp.plot()
+    plt.title(f"Confusion Matrix - {dataset_name}")
+    plt.show()
+
+    y_prob = knn.predict_proba(X_test)
+
+    from sklearn.metrics import RocCurveDisplay
+
+    # Only run for multi-class datasets
     if len(y.unique()) > 2:
-        roc_auc = roc_auc_score(y_test, y_prob, multi_class="ovr")
+
+        fig, ax = plt.subplots()
+
+        class_names = ['Non-Diabetic', 'Pre-Diabetic', 'Diabetic']
+
+        for i in range(len(class_names)):
+            RocCurveDisplay.from_predictions(
+                y_test == i,
+                y_prob[:, i],
+                name=class_names[i],
+                ax=ax
+            )
+
+        plt.title(f"ROC Curve - {dataset_name}")
+        plt.show()
+
     else:
-        roc_auc = roc_auc_score(y_test, y_prob[:, 1])
-
-    #Print results
-    print("Results:")
-    print("Accuracy:", round(accuracy, 4))
-    print("Precision:", round(precision, 4))
-    print("Recall:", round(recall, 4))
-    print("F1 Score:", round(f1, 4))
-    print("ROC-AUC:", round(roc_auc, 4))
-    print("-----------------------------------\n")
-
-    # Return results for comparison
-    return [dataset_name, accuracy, precision, recall, f1, roc_auc]
+        # Keep your original binary ROC here if you want
+        fpr, tpr, _ = roc_curve(y_test, y_prob[:, 1])
+        plt.plot(fpr, tpr)
+        plt.title(f"ROC Curve - {dataset_name}")
+        plt.show()
 
 
-# Load all 3 datasets
+# Load dataset
 data1 ="diabetes_012_health_indicators_BRFSS2015.csv"
-data2 ="diabetes_binary_5050split_health_indicators_BRFSS2015.csv"
-data3="diabetes_binary_health_indicators_BRFSS2015.csv"
-
 
 # Run models on each dataset
-results = []
-results.append(["Dataset", "Accuracy", "Precision", "Recall", "F1", "ROC_AUC",])
-results.append(run_knn_model(data1, "Diabetes_012", "Original Dataset"))
-results.append(run_knn_model(data2, "Diabetes_binary", "Balanced Dataset"))
-results.append(run_knn_model(data3, "Diabetes_binary", "Binary Dataset"))
+run_knn_model(data1, "Diabetes_012", "Original Dataset")
 
 
-# Compare Results
-results_df = pd.DataFrame(results)
-print("\nFinal Comparison Table")
-print("-" *75 )
-print(results_df)
