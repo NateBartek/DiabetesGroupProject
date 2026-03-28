@@ -1,10 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score, classification_report, roc_auc_score,RocCurveDisplay
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score, RocCurveDisplay, ConfusionMatrixDisplay
 
-#load data
+
 diabetes_health_indicators_data = pd.read_csv("diabetes_012_health_indicators_BRFSS2015.csv")
 
 #drop any rows with missing values
@@ -19,7 +20,6 @@ print(diabetes_health_indicators_data['Diabetes_012'].value_counts(normalize=Tru
 #class imbalance pie chart
 labels = ['Non-diabetic', 'Diabetic', 'Pre-diabetic']
 sizes = [213703, 35346, 4631]
-# colors = ['#1D9E75', '#BA7517', '#D4537E']
 plt.pie(sizes, labels=labels, autopct='%1.1f%%')
 plt.title('Class Distribution — BRFSS 2015')
 plt.savefig('class_distribution_pie.png', dpi=150, bbox_inches='tight')
@@ -55,4 +55,13 @@ for i, class_name in enumerate(['Non-Diabetic', 'Pre-Diabetic', 'Diabetic']):
     RocCurveDisplay.from_predictions(labels_test == i, predicted_diabetes_probability[:, i],
                                      name=class_name, ax=ax)
 plt.title('ROC Curve - Decision Tree')
+plt.show()
+
+#confusion matrix
+cmap = mcolors.LinearSegmentedColormap.from_list("", ["#FFF8F0", "#5DCAA5", "#2AADA0", "#1A7A70"])
+
+ConfusionMatrixDisplay.from_predictions(labels_test, predicted_diabetes,
+    display_labels=['Non-Diabetic', 'Pre-Diabetic', 'Diabetic'],
+    cmap=cmap)
+plt.title('Confusion Matrix — Decision Tree')
 plt.show()
