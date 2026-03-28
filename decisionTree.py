@@ -16,6 +16,15 @@ print(diabetes_health_indicators_data['Diabetes_012'].value_counts())
 print("\n")
 print(diabetes_health_indicators_data['Diabetes_012'].value_counts(normalize=True) * 100)
 
+#class imbalance pie chart
+labels = ['Non-diabetic', 'Diabetic', 'Pre-diabetic']
+sizes = [213703, 35346, 4631]
+# colors = ['#1D9E75', '#BA7517', '#D4537E']
+plt.pie(sizes, labels=labels, autopct='%1.1f%%')
+plt.title('Class Distribution — BRFSS 2015')
+plt.savefig('class_distribution_pie.png', dpi=150, bbox_inches='tight')
+plt.show()
+
 
 feature_matrix = diabetes_health_indicators_data.drop('Diabetes_012', axis=1)
 feature_label = diabetes_health_indicators_data['Diabetes_012']
