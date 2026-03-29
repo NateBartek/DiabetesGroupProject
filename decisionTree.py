@@ -51,9 +51,9 @@ print(f"ROC AUC: {roc_auc_score(labels_test, predicted_diabetes_probability, mul
 
 #ROC AUC curve
 fig, ax = plt.subplots()
-for i, class_name in enumerate(['Non-Diabetic', 'Pre-Diabetic', 'Diabetic']):
+for i, (class_name, color) in enumerate(zip(['Non-Diabetic', 'Pre-Diabetic', 'Diabetic'], ["#2AADA0", "#F7A623", "#E8501A"])):
     RocCurveDisplay.from_predictions(labels_test == i, predicted_diabetes_probability[:, i],
-                                     name=class_name, ax=ax)
+                                     name=class_name, ax=ax, curve_kwargs={"color": color})
 plt.title('ROC Curve - Decision Tree')
 plt.show()
 
