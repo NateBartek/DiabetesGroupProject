@@ -1,6 +1,7 @@
 # Diabetes Prediction(K-Nearest Neighbors Model)
 # Import libraries
 import pandas as pd
+from matplotlib import colors
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
@@ -75,9 +76,23 @@ def run_knn_model(file_name, target_column, dataset_name):
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred))
 
+    import seaborn as sns
+    from matplotlib.colors import LinearSegmentedColormap
+
+    # Create confusion matrix
     cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-    disp.plot()
+
+    # Custom color palette
+    colors = ["#FFF8F0", "#5DCAA5", "#2AADA0", "#1A7A70"]
+    custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", colors)
+
+    # Plot heatmap
+    sns.heatmap(cm, annot=True, fmt="g", cmap=custom_cmap,
+                xticklabels=['Non-Diabetic', 'Pre-Diabetic', 'Diabetic'],
+                yticklabels=['Non-Diabetic', 'Pre-Diabetic', 'Diabetic'],)
+
+    plt.ylabel("Actual")
+    plt.xlabel("Predicted")
     plt.title(f"Confusion Matrix - {dataset_name}")
     plt.show()
 
